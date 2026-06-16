@@ -1779,7 +1779,7 @@ class HeaderControlState extends State<HeaderControl>
                       size: 19,
                       color: Colors.white,
                     ),
-                    onPressed: plPlayerController.refreshPlayer,
+                    onPressed: () => videoDetailCtr.queryVideoUrl(fromReset: true),
                   ),
                 ),
               title,

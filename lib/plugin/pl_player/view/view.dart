@@ -371,7 +371,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       if (Platform.isAndroid && _pausedTime != null) {
         final duration = DateTime.now().difference(_pausedTime!);
         if (duration.inSeconds > 60 && Pref.autoReloadPlayer) {
-          plPlayerController.refreshPlayer();
+          if (widget.videoDetailController != null) {
+            widget.videoDetailController!.queryVideoUrl(fromReset: true);
+          } else {
+            plPlayerController.refreshPlayer();
+          }
         }
       }
       _pausedTime = null;
@@ -2059,7 +2063,13 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   plPlayerController.playerStatus.isPlaying)) {
             return Center(
               child: GestureDetector(
-                onTap: plPlayerController.refreshPlayer,
+                onTap: () {
+                  if (widget.videoDetailController != null) {
+                    widget.videoDetailController!.queryVideoUrl(fromReset: true);
+                  } else {
+                    plPlayerController.refreshPlayer();
+                  }
+                },
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(

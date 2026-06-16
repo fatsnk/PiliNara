@@ -145,6 +145,7 @@ class PlPlayerController with BlockConfigMixin {
   /// 全屏状态
   final RxBool isFullScreen = false.obs;
   void Function(bool isFullScreen)? onFullScreenChanged;
+  VoidCallback? onVideoUrlErrorRetry;
   // 系统原生 PiP 状态
   final RxBool isNativePip = false.obs;
   // 默认投稿视频格式
@@ -1182,7 +1183,11 @@ class PlPlayerController with BlockConfigMixin {
                     '视频链接打开失败，重试中',
                     displayTime: const Duration(milliseconds: 500),
                   );
-                  refreshPlayer();
+                  if (onVideoUrlErrorRetry != null) {
+                    onVideoUrlErrorRetry!();
+                  } else {
+                    refreshPlayer();
+                  }
                 }
               });
             },

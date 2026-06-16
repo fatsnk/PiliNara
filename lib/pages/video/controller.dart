@@ -136,8 +136,9 @@ class VideoDetailController extends GetxController
   final videoPlayerKey = GlobalKey();
   final childKey = GlobalKey<ScaffoldState>();
 
-  PlPlayerController plPlayerController = PlPlayerController.getInstance()
-    ..brightness.value = -1;
+  late PlPlayerController plPlayerController = PlPlayerController.getInstance()
+    ..brightness.value = -1
+    ..onVideoUrlErrorRetry = () => queryVideoUrl(fromReset: true);
   bool get setSystemBrightness => plPlayerController.setSystemBrightness;
   bool get removeSafeArea => plPlayerController.removeSafeArea;
   double get uiScale => plPlayerController.uiScale;
@@ -905,7 +906,8 @@ class VideoDetailController extends GetxController
   }) async {
     // 如果播放器单例已被外部销毁（例如在二级页面关闭了小窗），重新获取一个新实例
     if (plPlayerController.videoPlayerController == null) {
-      plPlayerController = PlPlayerController.getInstance();
+      plPlayerController = PlPlayerController.getInstance()
+        ..onVideoUrlErrorRetry = () => queryVideoUrl(fromReset: true);
     }
     if (isFileSource) {
       await _loadLocalPlaybackMeta();

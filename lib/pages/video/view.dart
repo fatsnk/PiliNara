@@ -1131,9 +1131,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                                                     .colorScheme
                                                     .onSurface,
                                               ),
-                                              onPressed: videoDetailController
-                                                  .plPlayerController
-                                                  .refreshPlayer,
+                                              onPressed: () => videoDetailController
+                                                  .queryVideoUrl(fromReset: true),
                                             ),
                                           ),
                                         ],
@@ -1682,8 +1681,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                           ),
                         ],
                       ),
-                      onPressed:
-                          videoDetailController.plPlayerController.refreshPlayer,
+                      onPressed: () =>
+                          videoDetailController.queryVideoUrl(fromReset: true),
                     ),
                   ),
                 ],
