@@ -80,6 +80,7 @@ import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:window_manager/window_manager.dart';
@@ -153,6 +154,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   Offset? _initialFocalPoint;
 
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
+  DateTime? _pausedTime;
 
   StreamSubscription? _brightnessListener;
   void _onBrightnessChanged(double value) {
@@ -346,6 +348,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _pausedTime = DateTime.now();
+    }
+
     if (!plPlayerController.continuePlayInBackground.value) {
       late final player = plPlayerController.videoPlayerController;
       if (const <AppLifecycleState>[.paused, .detached].contains(state)) {
@@ -359,6 +365,16 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           player?.play();
         }
       }
+    }
+
+    if (state == AppLifecycleState.resumed) {
+      if (Platform.isAndroid && _pausedTime != null) {
+        final duration = DateTime.now().difference(_pausedTime!);
+        if (duration.inSeconds > 60 && Pref.autoReloadPlayer) {
+          plPlayerController.refreshPlayer();
+        }
+      }
+      _pausedTime = null;
     }
   }
 

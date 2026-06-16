@@ -1092,7 +1092,9 @@ class PlPlayerController with BlockConfigMixin {
         for (final element in _statusListeners) {
           element(event ? PlayerStatus.playing : PlayerStatus.paused);
         }
-        if (videoPlayerController!.state.position.inSeconds != 0) {
+        if (event) {
+          makeHeartBeat(positionSeconds.value, type: HeartBeatType.completed, isManual: true);
+        } else if (videoPlayerController!.state.position.inSeconds != 0) {
           makeHeartBeat(positionSeconds.value, type: HeartBeatType.status);
         }
       }),
@@ -1763,7 +1765,7 @@ class PlPlayerController with BlockConfigMixin {
     }
     if (isLive ||
         !enableHeart ||
-        progress == 0 ||
+        (progress == 0 && !isManual) ||
         (playerStatus.isPaused && !isManual)) {
       return null;
     }

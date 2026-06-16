@@ -1772,14 +1772,14 @@ class HeaderControlState extends State<HeaderControl>
                   width: btnWidth,
                   height: btnHeight,
                   child: IconButton(
-                    tooltip: '返回主页',
+                    tooltip: '重载视频',
                     style: btnStyle,
                     icon: const Icon(
-                      FontAwesomeIcons.house,
-                      size: 15,
+                      Icons.refresh_outlined,
+                      size: 19,
                       color: Colors.white,
                     ),
-                    onPressed: plPlayerController.onCloseAll,
+                    onPressed: plPlayerController.refreshPlayer,
                   ),
                 ),
               title,

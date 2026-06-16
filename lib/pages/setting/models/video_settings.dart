@@ -159,6 +159,13 @@ List<SettingsModel> get videoSettings => [
       getSubtitle: () => '当前：${Pref.audioOutput}',
       onTap: _showAudioOutputDialog,
     ),
+  const SwitchModel(
+    title: '后台返回自动重载',
+    subtitle: '应用在后台停留超过30秒返回时，自动重载播放器，解决部分设备画面冻结问题',
+    leading: Icon(Icons.refresh_outlined),
+    setKey: SettingBoxKey.autoReloadPlayer,
+    defaultVal: false,
+  ),
   SwitchModel(
     title: '允许与其他应用同时播放',
     subtitle:

@@ -180,7 +180,8 @@ abstract final class SettingBoxKey {
       floatingNavBar = 'floatingNavBar',
       mixWithOthers = 'mixWithOthers',
       removeSafeArea = 'removeSafeArea',
-      angleDegrees = 'angleDegrees';
+      angleDegrees = 'angleDegrees',
+      autoReloadPlayer = 'autoReloadPlayer';
 
   static const String enableAiChat = 'enableAiChat',
       aiApiUrl = 'aiApiUrl',

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
-import 'package:flutter/services.dart' show SystemChrome;
+import 'package:flutter/services.dart' show SystemChrome, SystemUiMode;
 
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/style.dart';
@@ -492,17 +492,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final isResume = state == .resumed;
+    final isResume = state == AppLifecycleState.resumed;
     final ctr = videoDetailController.plPlayerController..visible = isResume;
     if (isResume) {
       if (Platform.isAndroid && !showSystemBar_) {
-        SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       }
       if (!ctr.showDanmaku) {
         introController.startTimer();
         ctr.showDanmaku = true;
       }
-    } else if (state == .paused) {
+    } else if (state == AppLifecycleState.paused) {
       introController.cancelTimer();
       ctr.showDanmaku = false;
     }
@@ -1123,17 +1123,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                                             width: 42,
                                             height: 34,
                                             child: IconButton(
-                                              tooltip: '返回主页',
+                                              tooltip: '重载视频',
                                               icon: Icon(
-                                                FontAwesomeIcons.house,
-                                                size: 15,
+                                                Icons.refresh_outlined,
+                                                size: 19,
                                                 color: themeData
                                                     .colorScheme
                                                     .onSurface,
                                               ),
                                               onPressed: videoDetailController
                                                   .plPlayerController
-                                                  .onCloseAll,
+                                                  .refreshPlayer,
                                             ),
                                           ),
                                         ],
@@ -1670,10 +1670,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                     width: 42,
                     height: 34,
                     child: IconButton(
-                      tooltip: '返回主页',
+                      tooltip: '重载视频',
                       icon: const Icon(
-                        FontAwesomeIcons.house,
-                        size: 15,
+                        Icons.refresh_outlined,
+                        size: 19,
                         color: Colors.white,
                         shadows: [
                           Shadow(
@@ -1683,7 +1683,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         ],
                       ),
                       onPressed:
-                          videoDetailController.plPlayerController.onCloseAll,
+                          videoDetailController.plPlayerController.refreshPlayer,
                     ),
                   ),
                 ],
