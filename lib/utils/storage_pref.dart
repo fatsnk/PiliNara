@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' show pow, sqrt;
 
 import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart'
     show deviceTouchSlop;
@@ -314,8 +313,10 @@ abstract final class Pref {
 
   static List<double> get springDescription => List<double>.from(
     _setting.get(SettingBoxKey.springDescription) ??
-        [0.5, 100.0, 2.2 * sqrt(50)], // [mass, stiffness, damping]
+        // duration: 0.3, bounce: 0.0
+        const [1.0, 438.64908449286037, 41.88790204786391],
   );
+  //   [0.5, 100.0, 2.2 * math.sqrt(50)], // [mass, stiffness, damping]
 
   static List<double> get speedList => List<double>.from(
     _video.get(
@@ -459,20 +460,38 @@ abstract final class Pref {
     defaultValue: AudioQuality.k192.code,
   );
 
-  static String get defaultDecode => _setting.get(
-    SettingBoxKey.defaultDecode,
-    defaultValue: VideoDecodeFormatType.AVC.codes.first,
-  );
+  static List<VideoDecodeFormatType> get preferCodecs {
+    // TODO: remove next 2 version
+    if (_setting.get('defaultDecode') case String codecStr) {
+      String? codecStr2 = _setting.get('secondDecode');
+      _setting.deleteAll(const ['defaultDecode', 'secondDecode']);
+      final codecs = [
+        VideoDecodeFormatType.values.firstWhere(
+          (i) => i.codes.contains(codecStr),
+        ),
+        if (codecStr2 != null && codecStr2 != codecStr)
+          VideoDecodeFormatType.values.firstWhere(
+            (i) => i.codes.contains(codecStr2),
+          ),
+      ];
+      _setting.put(
+        SettingBoxKey.preferCodecs,
+        codecs.map((i) => i.name).toList(),
+      );
+      return codecs;
+    }
 
-  static String get secondDecode => _setting.get(
-    SettingBoxKey.secondDecode,
-    defaultValue: VideoDecodeFormatType.AV1.codes.first,
-  );
+    final codecs = _setting.get(SettingBoxKey.preferCodecs);
+    if (codecs is List) {
+      return codecs.map((i) => VideoDecodeFormatType.values.byName(i)).toList();
+    }
+    return const <VideoDecodeFormatType>[.AVC, .AV1];
+  }
 
   static String get hardwareDecoding => _setting.get(
     SettingBoxKey.hardwareDecoding,
     defaultValue: Platform.isAndroid
-        ? HwDecType.autoSafe.hwdec
+        ? HwDecType.androidDefault
         : HwDecType.auto.hwdec,
   );
 
@@ -557,6 +576,11 @@ abstract final class Pref {
 
   static bool get blockToast =>
       _setting.get(SettingBoxKey.blockToast, defaultValue: true);
+
+  static bool get blockSkipWhenSeekIntoSegment => _setting.get(
+    SettingBoxKey.blockSkipWhenSeekIntoSegment,
+    defaultValue: false,
+  );
 
   static String get blockServer => _setting.get(
     SettingBoxKey.blockServer,
@@ -663,6 +687,33 @@ abstract final class Pref {
 
   static int get subtitleFontWeight =>
       _setting.get(SettingBoxKey.subtitleFontWeight, defaultValue: 5);
+
+  // 副字幕默认小一号(80%/全屏120%),其余默认同主字幕
+  static double get subtitleSecondaryFontScale =>
+      _setting.get(SettingBoxKey.subtitleSecondaryFontScale, defaultValue: 0.8);
+
+  static double get subtitleSecondaryFontScaleFS => _setting.get(
+    SettingBoxKey.subtitleSecondaryFontScaleFS,
+    defaultValue: 1.1,
+  );
+
+  static double get subtitleSecondaryBgOpacity => _setting.get(
+    SettingBoxKey.subtitleSecondaryBgOpacity,
+    defaultValue: 0.67,
+  );
+
+  static double get subtitleSecondaryStrokeWidth => _setting.get(
+    SettingBoxKey.subtitleSecondaryStrokeWidth,
+    defaultValue: 2.0,
+  );
+
+  static int get subtitleSecondaryFontWeight =>
+      _setting.get(SettingBoxKey.subtitleSecondaryFontWeight, defaultValue: 5);
+
+  static double get subtitleSecondarySpacing => _setting.get(
+    SettingBoxKey.subtitleSecondarySpacing,
+    defaultValue: 4.0,
+  );
 
   static bool get badCertificateCallback =>
       _setting.get(SettingBoxKey.badCertificateCallback, defaultValue: false);
@@ -830,6 +881,12 @@ abstract final class Pref {
   static set replyMinLevel(int v) =>
       _setting.put(SettingBoxKey.replyMinLevel, v);
 
+  static bool get keepUpOwnerReply =>
+      _setting.get(SettingBoxKey.keepUpOwnerReply, defaultValue: true);
+
+  static bool get keepUpTopReply =>
+      _setting.get(SettingBoxKey.keepUpTopReply, defaultValue: true);
+
   static bool get keepUpLikeReply =>
       _setting.get(SettingBoxKey.keepUpLikeReply, defaultValue: false);
 
@@ -952,7 +1009,7 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.showPgcTimeline, defaultValue: true);
 
   static num get maxCacheSize =>
-      _setting.get(SettingBoxKey.maxCacheSize) ?? pow(1024, 3);
+      _setting.get(SettingBoxKey.maxCacheSize) ?? 1 << 30;
 
   static bool get optTabletNav =>
       _setting.get(SettingBoxKey.optTabletNav, defaultValue: true);
@@ -1161,9 +1218,6 @@ abstract final class Pref {
       !Platform.isIOS &&
       _setting.get(SettingBoxKey.dynamicColor, defaultValue: true);
 
-  static bool get autoClearCache =>
-      _setting.get(SettingBoxKey.autoClearCache, defaultValue: false);
-
   static bool get enableSystemProxy =>
       _setting.get(SettingBoxKey.enableSystemProxy, defaultValue: false);
 
@@ -1248,6 +1302,11 @@ abstract final class Pref {
 
   static bool get enableLongShowControl =>
       _setting.get(SettingBoxKey.enableLongShowControl, defaultValue: false);
+
+  static bool get showControlsOnManualEpisodeChange => _setting.get(
+    SettingBoxKey.showControlsOnManualEpisodeChange,
+    defaultValue: false,
+  );
 
   static double get bufferSize =>
       _setting.get(SettingBoxKey.bufferSize, defaultValue: 4.0);
@@ -1479,6 +1538,11 @@ abstract final class Pref {
   static bool get floatingNavBar =>
       _setting.get(SettingBoxKey.floatingNavBar, defaultValue: false);
 
+  static bool get enableCurrentPageRefresh => _setting.get(
+    SettingBoxKey.enableCurrentPageRefresh,
+    defaultValue: false,
+  );
+
   static bool get removeSafeArea =>
       _setting.get(SettingBoxKey.removeSafeArea, defaultValue: false);
 
@@ -1542,4 +1606,6 @@ abstract final class Pref {
 
   static double get maxVolume => // desktop
       _setting.get(SettingBoxKey.maxVolume, defaultValue: 2.0);
+
+  static List? get liveStream => _setting.get(SettingBoxKey.liveStream);
 }

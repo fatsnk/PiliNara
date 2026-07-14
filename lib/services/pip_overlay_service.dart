@@ -6,6 +6,7 @@ import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/services/logger.dart';
+import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:flutter/foundation.dart';
@@ -98,6 +99,33 @@ class PipOverlayService {
         plPlayerController.enterPip(autoEnter: true);
       } else {
         plPlayerController.disableAutoEnterPip();
+      }
+    }
+  }
+
+  // 释放小窗持有的旧视频页 owner。只能由 stopPip 在清空静态引用前捕获参数后
+  // 调用（releaseSavedOwner 标志），避免调用方在 stopPip 之后读取已清空的引用
+  // 导致释放静默失效。
+  // disposePlayer 语义：owner 页面已离开路由栈（如从列表点开新视频）才允许
+  // dispose；owner 仍在栈内（链式进入新视频/直播，稍后会返回恢复）只能暂停——
+  // dispose 会消耗 owner 页面持有的 _playerCount 计数，导致后续页面 dispose 时
+  // 计数归零、误销毁下层页面正在复用的播放器实例
+  static void _releaseSavedVideoOwner({
+    required VideoDetailController controller,
+    required PlPlayerController? player,
+    required bool disposePlayer,
+  }) {
+    controller
+      ..isEnteringPip = false
+      ..cancelBlockListener();
+
+    if (player != null) {
+      controller.makeHeartBeat();
+      if (disposePlayer) {
+        videoPlayerServiceHandler?.onVideoDetailDispose(controller.heroTag);
+        player.dispose();
+      } else {
+        player.pause();
       }
     }
   }
@@ -232,6 +260,8 @@ class PipOverlayService {
     bool immediate = false,
     bool resetState = true,
     String? targetContextKey,
+    bool releaseSavedOwner = false,
+    bool disposeSavedOwnerPlayer = true,
   }) {
     if (!isInPipMode && _overlayEntry == null) {
       return;
@@ -257,6 +287,8 @@ class PipOverlayService {
 
     final closeCallback = callOnClose ? _onCloseCallback : null;
     final playerController = _savedPlayerController;
+    // 静态引用即将被清空，释放 owner 所需的引用必须在此捕获
+    final ownerToRelease = releaseSavedOwner ? _savedController : null;
     _onCloseCallback = null;
     _onTapToReturnCallback = null;
 
@@ -274,10 +306,8 @@ class PipOverlayService {
     if (shouldResetState && _savedController is VideoDetailController) {
       final ctrl = _savedController as VideoDetailController;
       ctrl.isEnteringPip = false;
+      ctrl.cancelBlockListener();
       if (ctrl.isClosed) {
-        ctrl.onClose();
-      } else {
-        ctrl.cancelBlockListener();
       }
       for (final controller in _savedControllers.values) {
         _setEnteringPipFlag(controller, false);
@@ -319,6 +349,14 @@ class PipOverlayService {
         if (kDebugMode) {
           debugPrint('Error removing pip overlay: $e');
         }
+      }
+      // overlay 已移除，此时 dispose 播放器不会留下持有失效纹理的窗口
+      if (ownerToRelease is VideoDetailController) {
+        _releaseSavedVideoOwner(
+          controller: ownerToRelease,
+          player: playerController,
+          disposePlayer: disposeSavedOwnerPlayer,
+        );
       }
       closeCallback?.call();
     }
@@ -610,7 +648,9 @@ class _PipWidgetState extends State<PipWidget> with WidgetsBindingObserver {
                               final plController =
                                   controller?.plPlayerController;
                               if (plController != null) {
-                                final current = plController.position;
+                                final current = Duration(
+                                  seconds: plController.position.value,
+                                );
                                 plController.seekTo(
                                   current - const Duration(seconds: 10),
                                 );
@@ -659,7 +699,9 @@ class _PipWidgetState extends State<PipWidget> with WidgetsBindingObserver {
                               final plController =
                                   controller?.plPlayerController;
                               if (plController != null) {
-                                final current = plController.position;
+                                final current = Duration(
+                                  seconds: plController.position.value,
+                                );
                                 plController.seekTo(
                                   current + const Duration(seconds: 10),
                                 );

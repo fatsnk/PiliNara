@@ -157,6 +157,8 @@ AGENTS.md
 
 CLAUDE.md
 
+CONTEXT.md
+
 .claude
 test*
 /pubspec_overrides.yaml
