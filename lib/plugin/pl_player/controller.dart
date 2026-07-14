@@ -1103,7 +1103,10 @@ class PlPlayerController with BlockConfigMixin {
           element(playing ? .playing : .paused);
         }
         final seconds = videoPlayerController!.state.position.inSeconds;
-        if (seconds != 0) {
+        if (playing) {
+          // 本分支改动：开始播放时立即记录（isManual: true 允许 progress 为 0）；合并时需保留此逻辑
+          makeHeartBeat(seconds, type: .completed, isManual: true);
+        } else if (seconds != 0) {
           makeHeartBeat(seconds, type: .status);
         }
       }),
