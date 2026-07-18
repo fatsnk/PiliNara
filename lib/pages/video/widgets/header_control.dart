@@ -4,6 +4,7 @@ import 'dart:io' show Platform, File;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/utils/storage_pref.dart' show Pref;
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/dialog/report.dart';
@@ -1050,7 +1051,9 @@ class HeaderControlState extends State<HeaderControl>
                         }
                       },
                       // 可能包含会员解锁画质
-                      enabled: index >= totalQaSam - usefulQaSam,
+                      // 当开启解锁高画质时，所有画质选项均可点击
+                      enabled: Pref.unlockHighQuality ||
+                          index >= totalQaSam - usefulQaSam,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                       ),

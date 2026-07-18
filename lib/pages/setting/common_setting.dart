@@ -1,5 +1,6 @@
 import 'package:PiliPlus/models/common/setting_type.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
 
 class CommonSetting extends StatefulWidget {
@@ -7,10 +8,12 @@ class CommonSetting extends StatefulWidget {
     super.key,
     required this.settingType,
     this.showAppBar = true,
+    this.showHiddenSettings = false,
   });
 
   final bool showAppBar;
   final SettingType settingType;
+  final bool showHiddenSettings;
 
   @override
   State<CommonSetting> createState() => _CommonSettingState();
@@ -22,6 +25,16 @@ class _CommonSettingState extends State<CommonSetting> {
 
   void _initSetting() {
     settings = widget.settingType.settings;
+    // 过滤隐藏设置项（仅音视频设置页面）
+    if (!widget.showHiddenSettings &&
+        widget.settingType == SettingType.videoSetting) {
+      settings = settings.where((s) {
+        if (s is SwitchModel && s.setKey == SettingBoxKey.unlockHighQuality) {
+          return false;
+        }
+        return true;
+      }).toList();
+    }
   }
 
   @override

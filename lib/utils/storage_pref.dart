@@ -1608,4 +1608,7 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.maxVolume, defaultValue: 2.0);
 
   static List? get liveStream => _setting.get(SettingBoxKey.liveStream);
+
+  static bool get unlockHighQuality =>
+      _setting.get(SettingBoxKey.unlockHighQuality, defaultValue: false);
 }

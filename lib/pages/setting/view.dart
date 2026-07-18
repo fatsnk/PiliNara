@@ -146,7 +146,7 @@ class _SettingPageState extends State<SettingPage> {
     super.dispose();
   }
 
-  void _toPage(SettingType type) {
+  void _toPage(SettingType type, {bool showHidden = false}) {
     if (_isPortrait) {
       Get.to(
         () => switch (type) {
@@ -156,7 +156,10 @@ class _SettingPageState extends State<SettingPage> {
           .videoSetting ||
           .playSetting ||
           .styleSetting ||
-          .extraSetting => CommonSetting(settingType: type),
+          .extraSetting => CommonSetting(
+            settingType: type,
+            showHiddenSettings: showHidden,
+          ),
           .webdavSetting => const WebDavSettingPage(),
           .about => const AboutPage(),
         },
@@ -191,6 +194,9 @@ class _SettingPageState extends State<SettingPage> {
               (item) => ListTile(
                 tileColor: _getTileColor(theme, item.type),
                 onTap: () => _toPage(item.type),
+                onLongPress: item.type == SettingType.videoSetting
+                    ? () => _toPage(item.type, showHidden: true)
+                    : null,
                 leading: item.icon,
                 title: Text(item.type.title, style: titleStyle),
                 subtitle: item.subtitle == null

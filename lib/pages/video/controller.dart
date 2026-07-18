@@ -15,6 +15,7 @@ import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/http/video.dart';
+import 'package:PiliPlus/http/video_app_api.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
 import 'package:PiliPlus/models/common/list_order.dart';
 import 'package:PiliPlus/models/common/sponsor_block/action_type.dart';
@@ -861,6 +862,20 @@ class VideoDetailController extends GetxController
   void updatePlayer() {
     final currentVideoQa = this.currentVideoQa.value;
     if (currentVideoQa == null) return;
+
+    // 如果开启了解锁高画质，且当前画质需要VIP（>=116），
+    // 但现有data中不包含该画质的流，则重新用APP API取流
+    if (Pref.unlockHighQuality && currentVideoQa.code >= 116) {
+      final allVideos = data.dash?.video;
+      final hasTargetQa = allVideos?.any((v) => v.id == currentVideoQa.code) ?? false;
+      if (!hasTargetQa) {
+        // 需要重新取流
+        plPlayerController.cacheVideoQa = currentVideoQa.code;
+        queryVideoUrl(fromReset: true);
+        return;
+      }
+    }
+
     _autoPlay.value = true;
     playedTime = plPlayerController.videoPlayerController?.state.position;
     plPlayerController
@@ -1040,16 +1055,44 @@ class VideoDetailController extends GetxController
             : Pref.defaultAudioQaCellular;
     }
 
-    final result = await VideoHttp.videoUrl(
-      cid: cid.value,
-      bvid: bvid,
-      epid: epId,
-      seasonId: seasonId,
-      tryLook: plPlayerController.tryLook,
-      videoType: _actualVideoType ?? videoType,
-      language: currLang.value,
-      voiceBalance: plPlayerController.enableAudioNormalization,
-    );
+    // 当解锁高画质开启时，优先尝试APP API取流
+    LoadingState<PlayUrlModel> result;
+    if (Pref.unlockHighQuality &&
+        plPlayerController.cacheVideoQa != null &&
+        plPlayerController.cacheVideoQa! >= 116) {
+      final appResult = await VideoAppApi.getVideoUrl(
+        bvid: bvid,
+        cid: cid.value,
+        qn: plPlayerController.cacheVideoQa!,
+      );
+      if (appResult.isSuccess) {
+        result = appResult;
+      } else {
+        // APP API失败，回落到Web API
+        SmartDialog.showToast('高画质取流失败，已回退到普通画质');
+        result = await VideoHttp.videoUrl(
+          cid: cid.value,
+          bvid: bvid,
+          epid: epId,
+          seasonId: seasonId,
+          tryLook: plPlayerController.tryLook,
+          videoType: _actualVideoType ?? videoType,
+          language: currLang.value,
+          voiceBalance: plPlayerController.enableAudioNormalization,
+        );
+      }
+    } else {
+      result = await VideoHttp.videoUrl(
+        cid: cid.value,
+        bvid: bvid,
+        epid: epId,
+        seasonId: seasonId,
+        tryLook: plPlayerController.tryLook,
+        videoType: _actualVideoType ?? videoType,
+        language: currLang.value,
+        voiceBalance: plPlayerController.enableAudioNormalization,
+      );
+    }
 
     if (result case Success(:final response)) {
       data = response;

@@ -203,6 +203,14 @@ List<SettingsModel> get videoSettings => [
     getSubtitle: () => '当前：${Pref.hardwareDecoding}（此项即mpv的--hwdec）',
     onTap: _showHwDecDialog,
   ),
+  // 隐藏功能：解锁高画质（仅长按音视频设置进入时显示）
+  const SwitchModel(
+    title: '解锁高画质（实验性）',
+    subtitle: '尝试通过APP API解锁1080P 60帧及以上画质。非大会员可能无法播放，将自动回落。',
+    leading: Icon(Icons.lock_open_outlined),
+    setKey: SettingBoxKey.unlockHighQuality,
+    defaultVal: false,
+  ),
 ];
 
 Future<void> _showCDNDialog(BuildContext context, VoidCallback setState) async {

@@ -184,7 +184,8 @@ abstract final class SettingBoxKey {
       removeSafeArea = 'removeSafeArea',
       angleDegrees = 'angleDegrees',
       autoReloadPlayer = 'autoReloadPlayer',
-      liveStream = 'liveStream';
+      liveStream = 'liveStream',
+      unlockHighQuality = 'unlockHighQuality';
 
   static const String enableAiChat = 'enableAiChat',
       aiApiUrl = 'aiApiUrl',
