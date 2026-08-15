@@ -40,6 +40,7 @@ abstract final class SettingBoxKey {
       showControlsOnManualEpisodeChange = 'showControlsOnManualEpisodeChange',
       horizontalScreen = 'horizontalScreen',
       CDNService = 'CDNService',
+      customCDNUrl = 'customCDNUrl',
       disableAudioCDN = 'disableAudioCDN',
       autoPiP = 'autoPiP',
       enableInAppPip = 'enableInAppPip',
@@ -105,7 +106,6 @@ abstract final class SettingBoxKey {
       banWordForZone = 'banWordForZone',
       savedRcmdTip = 'savedRcmdTip',
       openInBrowser = 'openInBrowser',
-      refreshDragPercentage = 'refreshDragPercentage',
       refreshDisplacement = 'refreshDisplacement',
       showHotRcmd = 'showHotRcmd',
       audioNormalization = 'audioNormalization',
@@ -142,6 +142,7 @@ abstract final class SettingBoxKey {
       slideDismissReplyPage = 'slideDismissReplyPage',
       showFSActionItem = 'showFSActionItem',
       enableShrinkVideoSize = 'enableShrinkVideoSize',
+      enablePinchRotate = 'enablePinchRotate',
       showDynActionBar = 'showDynActionBar',
       darkVideoPage = 'darkVideoPage',
       enableSlideVolumeBrightness = 'enableSlideVolumeBrightness',
@@ -165,6 +166,7 @@ abstract final class SettingBoxKey {
       quickFavId = 'quickFavId',
       showFsScreenshotBtn = 'showFsScreenshotBtn',
       showFsLockBtn = 'showFsLockBtn',
+      showFsLockBtnRight = 'showFsLockBtnRight',
       silentDownImg = 'silentDownImg',
       showMemberShop = 'showMemberShop',
       enablePlayAll = 'enablePlayAll',
@@ -250,6 +252,7 @@ abstract final class SettingBoxKey {
       mergeDanmakuSkipBottom = 'mergeDanmakuSkipBottom',
       mergeDanmakuMarkPosition = 'mergeDanmakuMarkPosition',
       mergeDanmakuMarkThreshold = 'mergeDanmakuMarkThreshold',
+      danmakuEnlarge = 'danmakuEnlarge',
       danmakuEnlargeThreshold = 'danmakuEnlargeThreshold',
       danmakuEnlargeLogBase = 'danmakuEnlargeLogBase',
       danmakuWeight = 'danmakuWeight',
@@ -321,7 +324,10 @@ abstract final class LocalCacheKey {
       mixinKey = 'mixinKey',
       timeStamp = 'timeStamp',
       buvid = 'buvid',
-      remarkMids = 'remarkMids';
+      remarkMids = 'remarkMids',
+      cdnNodeList = 'cdnNodeList',
+      cdnNodeListTime = 'cdnNodeListTime',
+      cdnNodeRegion = 'cdnNodeRegion';
 }
 
 abstract final class VideoBoxKey {
