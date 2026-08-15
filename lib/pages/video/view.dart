@@ -1796,26 +1796,27 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                     ),
                     onPressed: Get.back,
                   ),
-                  SizedBox(
-                    width: 42,
-                    height: 34,
-                    child: IconButton(
-                      tooltip: '重载视频',
-                      icon: const Icon(
-                        Icons.refresh_outlined,
-                        size: 19,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 1.5,
-                            color: Colors.black,
-                          ),
-                        ],
-                      ),
-                      onPressed: () =>
-                          videoDetailController.queryVideoUrl(fromReset: true),
+                ),
+                SizedBox(
+                  width: 42,
+                  height: 34,
+                  child: IconButton(
+                    tooltip: '重载视频',
+                    icon: const Icon(
+                      Icons.refresh_outlined,
+                      size: 19,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 1.5,
+                          color: Colors.black,
+                        ),
+                      ],
                     ),
+                    onPressed: () =>
+                        videoDetailController.queryVideoUrl(fromReset: true),
                   ),
+                ),
                 const Spacer(),
                 _moreBtn(
                   Colors.white,
