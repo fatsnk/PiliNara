@@ -18,11 +18,11 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:material_ui/material_ui.dart';
 
 List<SettingsModel> get videoSettings => [
   const SwitchModel(
@@ -158,6 +158,13 @@ List<SettingsModel> get videoSettings => [
         '首选解码格式：${(Pref.preferCodecs.map((i) => i.name).join(","))}，请根据设备支持情况与需求调整',
     onTap: _showCodecsDialog,
   ),
+  NormalModel(
+    title: '蜂窝网络首选解码格式',
+    leading: const Icon(Icons.movie_creation_outlined),
+    getSubtitle: () =>
+        '首选解码格式：${(Pref.preferCodecsCellular.map((i) => i.name).join(","))}，请根据设备支持情况与需求调整',
+    onTap: _showCellularCodecsDialog,
+  ),
   if (kDebugMode || Platform.isAndroid)
     NormalModel(
       title: '音频输出设备',
@@ -165,13 +172,6 @@ List<SettingsModel> get videoSettings => [
       getSubtitle: () => '当前：${Pref.audioOutput}',
       onTap: _showAudioOutputDialog,
     ),
-  const SwitchModel(
-    title: '后台返回自动重载',
-    subtitle: '应用在后台停留超过30秒返回时，自动重载播放器，解决部分设备画面冻结问题',
-    leading: Icon(Icons.refresh_outlined),
-    setKey: SettingBoxKey.autoReloadPlayer,
-    defaultVal: false,
-  ),
   SwitchModel(
     title: '允许与其他应用同时播放',
     subtitle:
@@ -444,6 +444,27 @@ Future<void> _showCodecsDialog(
   if (res != null && res.isNotEmpty) {
     await GStorage.setting.put(
       SettingBoxKey.preferCodecs,
+      res.map((i) => i.name).toList(),
+    );
+    setState();
+  }
+}
+
+Future<void> _showCellularCodecsDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<List<VideoDecodeFormatType>>(
+    context: context,
+    builder: (context) => OrderedMultiSelectDialog<VideoDecodeFormatType>(
+      title: '蜂窝网络首选解码格式',
+      initValues: Pref.preferCodecsCellular,
+      values: {for (final e in VideoDecodeFormatType.values) e: e.name},
+    ),
+  );
+  if (res != null && res.isNotEmpty) {
+    await GStorage.setting.put(
+      SettingBoxKey.preferCodecsCellular,
       res.map((i) => i.name).toList(),
     );
     setState();

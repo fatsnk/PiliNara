@@ -71,7 +71,6 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart'
     show RenderProxyBox, SemanticsConfiguration;
 import 'package:flutter/services.dart';
@@ -80,7 +79,7 @@ import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:media_kit/media_kit.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:window_manager/window_manager.dart';
@@ -159,7 +158,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   Offset? _initialFocalPoint;
 
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
-  DateTime? _pausedTime;
 
   StreamSubscription? _brightnessListener;
   void _onBrightnessChanged(double value) {
@@ -371,10 +369,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      _pausedTime = DateTime.now();
-    }
-
     if (!plPlayerController.continuePlayInBackground.value) {
       late final player = plPlayerController.videoPlayerController;
       if (const <AppLifecycleState>[.paused, .detached].contains(state)) {
@@ -388,20 +382,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           player?.play();
         }
       }
-    }
-
-    if (state == AppLifecycleState.resumed) {
-      if (Platform.isAndroid && _pausedTime != null) {
-        final duration = DateTime.now().difference(_pausedTime!);
-        if (duration.inSeconds > 60 && Pref.autoReloadPlayer) {
-          if (widget.videoDetailController != null) {
-            widget.videoDetailController!.queryVideoUrl(fromReset: true);
-          } else {
-            plPlayerController.refreshPlayer();
-          }
-        }
-      }
-      _pausedTime = null;
     }
   }
 
@@ -666,10 +646,13 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               width: widgetWidth,
               height: 30,
               tooltip: '分段信息',
-              icon: const Icon(
-                CustomIcons.view_headline_rotate_90,
-                size: 22,
-                color: Colors.white,
+              icon: DisabledIcon(
+                disable: !videoDetailController.showVP.value,
+                child: const Icon(
+                  CustomIcons.view_headline_rotate_90,
+                  size: 22,
+                  color: Colors.white,
+                ),
               ),
               onTap: widget.showViewPoints,
             );
@@ -2202,13 +2185,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   plPlayerController.playerStatus.isPlaying)) {
             return Center(
               child: GestureDetector(
-                onTap: () {
-                  if (widget.videoDetailController != null) {
-                    widget.videoDetailController!.queryVideoUrl(fromReset: true);
-                  } else {
-                    plPlayerController.refreshPlayer();
-                  }
-                },
+                onTap: plPlayerController.refreshPlayer,
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(
@@ -2441,7 +2418,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
     final success =
         await showDialog<bool>(
-          context: Get.context!,
+          context: context,
           builder: (context) => AlertDialog(
             title: const Text('动态截图'),
             content: Column(

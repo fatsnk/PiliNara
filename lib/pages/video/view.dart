@@ -82,12 +82,11 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, clampDouble;
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'
-    show SystemChrome, SystemUiMode, SystemUiOverlayStyle;
+import 'package:flutter/services.dart' show SystemChrome;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
 class VideoDetailPageV extends StatefulWidget {
@@ -619,17 +618,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final isResume = state == AppLifecycleState.resumed;
+    final isResume = state == .resumed;
     final ctr = videoDetailController.plPlayerController..visible = isResume;
     if (isResume) {
       if (Platform.isAndroid && !showSystemBar_) {
-        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
       }
       if (!ctr.showDanmaku) {
         introController.startTimer();
         ctr.showDanmaku = true;
       }
-    } else if (state == AppLifecycleState.paused) {
+    } else if (state == .paused) {
       introController.cancelTimer();
       ctr.showDanmaku = false;
     }
